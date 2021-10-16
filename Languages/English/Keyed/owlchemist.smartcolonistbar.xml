@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<LanguageData>
+	<OwlBar_Header_Icons>Icons:</OwlBar_Header_Icons>
+	<OwlBar_Header_Weapons>Weapons:</OwlBar_Header_Weapons>
+	
+	<OwlBar_ShowRoles>Show role icons (Ideology)</OwlBar_ShowRoles>
+	<OwlBar_ShowRolesDesc>Controls whether or not you want ideology role icons, such as leader or specialist, to show in the pawn portrait. This feature was added because normally icons represent temporarily effects, but the DLC deviates from this by including more permanent ones.</OwlBar_ShowRolesDesc>
+	
+	<OwlBar_ShowHunger>Show hunger icon</OwlBar_ShowHunger>
+	<OwlBar_ShowHungerDesc>Controls whether or not you want a hunger icon to show on a pawn's portrait. This can be useful when you are controlling drafted pawns for an extended period of time.</OwlBar_ShowHungerDesc>
+	
+	<OwlBar_ShowHungerIfDrafted>...but only show hunger icon if drafted</OwlBar_ShowHungerIfDrafted>
+	<OwlBar_ShowHungerIfDraftedDesc>The hunger icon will only be shown if drafted.</OwlBar_ShowHungerIfDraftedDesc>
+	
+	<OwlBar_ShowTired>Show tired icon</OwlBar_ShowTired>
+	<OwlBar_ShowTiredDesc>Controls whether or not you want a tired icon to show on a pawn's portrait. This can be useful when you are controlling drafted pawns for an extended period of time.</OwlBar_ShowTiredDesc>
+	
+	<OwlBar_ShowTiredIfDrafted>...but only show tired icon if drafted</OwlBar_ShowTiredIfDrafted>
+	<OwlBar_ShowTiredIfDraftedDesc>The tired icon will only be shown if drafted.</OwlBar_ShowTiredIfDraftedDesc>
+	
+	<OwlBar_ShowWeapons>Show weapons/tools icon</OwlBar_ShowWeapons>
+	<OwlBar_ShowWeaponsDesc>Controls whether or not you want weapons to show on a pawn's portrait.</OwlBar_ShowWeaponsDesc>
+	
+	<OwlBar_ShowWeaponsIfDrafted>...but only show weapons if drafted</OwlBar_ShowWeaponsIfDrafted>
+	<OwlBar_ShowWeaponsIfDraftedDesc>Weapons will only be shown if drafted.</OwlBar_ShowWeaponsIfDraftedDesc>
+	
+	<OCB_IconHungry>Pawn is hungry</OCB_IconHungry>
+	<OCB_IconTired>Pawn is tired</OCB_IconTired>
+</LanguageData>

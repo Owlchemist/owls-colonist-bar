@@ -1,1 +1,1 @@
-owls-colonist-bar
+A new, high performance colonist bar, designed to operate twice as fast than the vanilla one. Normally I only post the git once a mod is posted on the workshop, but as this is a longer-term project that may take awhile to finalize, a WIP pre-launch version is availabl here.
