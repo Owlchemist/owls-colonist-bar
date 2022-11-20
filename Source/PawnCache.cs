@@ -11,87 +11,53 @@ namespace OwlBar
 {
 	public class PawnCache
 	{
-		public PawnCache(Pawn pawn, Vector2 cachedDrawLocs, int groupID, int skipped, int i)
+		public PawnCache(Pawn pawn, Vector2 cachedDrawLocs, int worldGroupID, int skipped, int i)
 		{
 			entryIndex = i;
 			ID = pawn.thingIDNumber;
 
 			//Setup BG rect
-			container = new Rect(cachedDrawLocs.x - (72f * skipped * vanillaColonistBar.cachedScale), cachedDrawLocs.y, 48f, 48f);;
-			portraitRect = vanillaColonistBar.drawer.GetPawnTextureRect(container.position);
+			container = new Rect(cachedDrawLocs.x - (72f * skipped * 1f), cachedDrawLocs.y, 48f, 48f);
+			//portraitRect = vanillaColonistBar.drawer.GetPawnTextureRect(container.position);
+			portraitRect = new Rect(container.x + 1f, container.y - 26f, container.m_Width - 2f, container.m_Height + 26f).ContractedBy(2f);
 			portrait = PortraitsCache.Get(pawn, PawnTextureSize, Rot4.South, PawnTextureCameraOffset, 1.28205f, true, true, true, true, null, null, false);
 
 			//Weapon rect
 			weaponRect = container.ContractedBy(5f);
-			weaponRect.y += 5f * vanillaColonistBar.cachedScale;
-			weaponRect.x += 5f * vanillaColonistBar.cachedScale;
+			weaponRect.y += 5f * 1f;
+			weaponRect.x += 5f * 1f;
 			
 			//Label stuff
 			label = GenMapUI.GetPawnLabel(pawn, fastColonistBar.labelMaxWidth, vanillaColonistBar.drawer.pawnLabelsCache, 0); 
-			labelPos = new Vector2(container.center.x, container.yMax - 4f * vanillaColonistBar.cachedScale);
+			labelPos = new Vector2(container.center.x, container.yMax - 4f * 1f);
 			labelWidth = GenMapUI.GetPawnLabelNameWidth(pawn, fastColonistBar.labelMaxWidth, vanillaColonistBar.drawer.pawnLabelsCache, 0);
 			labelBGRect = new Rect(labelPos.x - labelWidth / 2f - 4f, labelPos.y, labelWidth + 8f, 12f);
 			labelRect = new Rect(labelBGRect.center.x - labelWidth / 2f, labelBGRect.y - 2f, labelWidth, 100f);
 
-			lastGroupID = groupID; //Checked each loop to determine if data is dirty
-			FetchShortCache(pawn);
+			//Group leader check
+			if (pawnGroups.groupLeaders.ContainsKey(ID))
+			{
+				groupRect = container;
+				groupRect.x += container.width;
+				groupRect.width = container.width / 5f;
+			}
+
+			lastWorldGroupID = worldGroupID; //Checked each loop to determine if data is dirty
+			FetchShortCache(pawn, false);
 		}
 		public Texture portrait;
 		public string label;
 		public float labelWidth;
 		public Vector2 labelPos;
-		public Rect container, portraitRect, labelBGRect, labelRect, weaponRect;
-		public int lastGroupID, entryIndex, ID;
-
+		public Rect container, portraitRect, labelBGRect, labelRect, weaponRect, groupRect;
+		public int lastWorldGroupID, entryIndex, ID, cacheReorderableGroup;
+		
 		//Short cache, refreshed every 120 frames (2~ seconds)
-		public void FetchShortCache(Pawn pawn)
+		public void FetchShortCache(Pawn pawn, bool shortOnly = true)
 		{
-			dead = pawn?.Dead ?? false;
-			if (!dead)
-			{
-				//Mood border
-				float moodPercentage = pawn.needs?.mood?.CurLevelPercentage ?? 1f;
-				if (moodPercentage >= pawn.mindState.mentalBreaker.BreakThresholdMinor) {
-					moodColor = Color.clear;
-					moodBorderWidth = ResourceBank.vector4Zero;
-				}
-				else if (moodPercentage < pawn.mindState.mentalBreaker.BreakThresholdExtreme) {
-					moodColor = ResourceBank.colorWhite;
-					moodBorderWidth = ResourceBank.vector4One * 3;
-				}
-				else if (moodPercentage < pawn.mindState.mentalBreaker.BreakThresholdMajor) {
-					moodColor = ResourceBank.colorRed;
-					moodBorderWidth = ResourceBank.vector4One * 2;
-				}
-				else {
-					moodColor = ResourceBank.colorYellow;
-					moodBorderWidth = ResourceBank.vector4One * 1;
-				}
-
-				//Mood grievances
-				if (moodPercentage < pawn.mindState.mentalBreaker.BreakThresholdMinor)
-				{
-					PawnNeedsUIUtility.GetThoughtGroupsInDisplayOrder(pawn.needs.mood, NeedsCardUtility.thoughtGroupsPresent);
-
-					int length = NeedsCardUtility.thoughtGroupsPresent.Count;
-					List<string> grievancesList = new List<string>();
-					for (int i = 0; i < length; ++i)
-					{
-						Thought thoughtGroup = NeedsCardUtility.thoughtGroupsPresent[i];
-						if (!thoughtGroup.VisibleInNeedsTab) continue;
-
-						float offset = pawn.needs.mood.thoughts.MoodOffsetOfGroup(thoughtGroup);
-						if (offset < 0f)
-						{
-							grievancesList.Add(System.Math.Ceiling(offset) + " " + thoughtGroup.def.LabelCap);
-						}
-					}
-					grievances = string.Join(System.Environment.NewLine, grievancesList);
-				}
-			}
-
-			drafted = pawn?.Drafted  ?? false;
-			health = pawn?.health.summaryHealth.SummaryHealthPercent ?? 0;
+			dead = pawn.Dead;
+			drafted = pawn.Drafted;
+			CacheMoodData(pawn);
 
 			//Icons
 			vanillaColonistBar.drawer.DrawIcons(portraitRect, pawn);
@@ -115,12 +81,8 @@ namespace OwlBar
 				}
 			}
 			iconCache = ColonistBarColonistDrawer.tmpIconsToDraw?.ToArray();
-			iconGap = Mathf.Min(BaseIconAreaWidth / (float)iconCount, BaseIconMaxSize) * vanillaColonistBar.cachedScale;
+			iconGap = Mathf.Min(BaseIconAreaWidth / (float)iconCount, BaseIconMaxSize) * 1f;
 			iconRect = new Rect(portraitRect.x + 1f, portraitRect.yMax - iconGap - 1f, iconGap, iconGap);
-
-			//Health
-			healthBar = labelBGRect;
-			healthBar.width *= health;
 
 			//Label color
 			labelColor = PawnNameColorUtility.PawnNameColorOf(pawn);
@@ -136,6 +98,26 @@ namespace OwlBar
 				Vector2 vector = GUIClip.Unclip(new Vector2(container.xMin + container.width / 2f, container.yMin + container.height / 2f) * Prefs.UIScale);
 				weaponMatrix = Matrix4x4.TRS(vector, Quaternion.Euler(0f, 0f, weapon.def.equippedAngleOffset +50f), Vector3.one) * Matrix4x4.TRS(-vector, Quaternion.identity, Vector3.one) * GUI.matrix;
 			}
+
+			//Bleeding
+			if (pawn.health.hediffSet.BleedRateTotal > 1f)
+			{
+				//These need to be reset to their original values
+				if (shortOnly)
+				{
+					label = GenMapUI.GetPawnLabel(pawn, fastColonistBar.labelMaxWidth, vanillaColonistBar.drawer.pawnLabelsCache, 0); 
+					labelBGRect = new Rect(labelPos.x - labelWidth / 2f - 4f, labelPos.y, labelWidth + 8f, 12f);
+				}
+				labelColor = ResourceBank.colorRed;
+				labelBGRect.height *= 2.2f;
+				labelBGRect.ExpandedBy(5f);
+				int num = HealthUtility.TicksUntilDeathDueToBloodLoss(pawn);
+				if (num < 60000)
+				{
+					emergency = true;
+					label += "\n" + num.ToStringTicksToPeriod(true, true, false, false);
+				}
+			}
 		}
 		public IconDrawCall[] iconCache;
 		public Rect iconRect, healthBar;
@@ -144,7 +126,7 @@ namespace OwlBar
 		public Thing weapon;
 		public Texture2D weaponIcon;
 		public Matrix4x4 weaponMatrix;
-		public bool drafted, dead, labelIsColored;
+		public bool drafted, dead, labelIsColored, emergency;
 		public int iconCount;
 		public float iconGap, health;
 		public string grievances;
@@ -154,6 +136,64 @@ namespace OwlBar
 			get
 			{
 				return PawnsFinder.All_AliveOrDead.FirstOrDefault(y => y.thingIDNumber == ID);
+			}
+		}
+
+		void CacheMoodData(Pawn pawn)
+		{
+			if (!dead)
+			{
+				//Mood border
+				float moodPercentage = pawn.needs?.mood?.CurLevelPercentage ?? 1f;
+				if (moodPercentage >= pawn.mindState.mentalBreaker.BreakThresholdMinor) {
+					if (!Settings.goodMoodAltMode)
+					{
+						moodColor = ResourceBank.colorClear;
+						moodBorderWidth = ResourceBank.vector4Zero;
+					}
+					else
+					{
+						moodColor = ResourceBank.colorGreen;
+						moodBorderWidth = ResourceBank.vector4One * 1;
+					}
+				}
+				else if (moodPercentage < pawn.mindState.mentalBreaker.BreakThresholdExtreme) {
+					moodColor = ResourceBank.colorWhite;
+					moodBorderWidth = ResourceBank.vector4One * 3;
+				}
+				else if (moodPercentage < pawn.mindState.mentalBreaker.BreakThresholdMajor) {
+					moodColor = ResourceBank.colorRed;
+					moodBorderWidth = ResourceBank.vector4One * 2;
+				}
+				else {
+					moodColor = ResourceBank.colorYellow;
+					moodBorderWidth = ResourceBank.vector4One * 1;
+				}
+
+				//Mood grievances
+				if (moodPercentage < pawn.mindState.mentalBreaker.BreakThresholdMinor)
+				{
+					pawn.needs.mood.thoughts.GetDistinctMoodThoughtGroups(NeedsCardUtility.thoughtGroupsPresent);
+					for (int i = NeedsCardUtility.thoughtGroupsPresent.Count - 1; i >= 0; --i)
+					{
+						if (!NeedsCardUtility.thoughtGroupsPresent[i].VisibleInNeedsTab) NeedsCardUtility.thoughtGroupsPresent.RemoveAt(i);
+					}
+
+					int length = NeedsCardUtility.thoughtGroupsPresent.Count;
+					List<string> grievancesList = new List<string>();
+					for (int i = 0; i < length; ++i)
+					{
+						Thought thoughtGroup = NeedsCardUtility.thoughtGroupsPresent[i];
+						if (!thoughtGroup.VisibleInNeedsTab) continue;
+
+						float offset = pawn.needs.mood.thoughts.MoodOffsetOfGroup(thoughtGroup);
+						if (offset < 0f)
+						{
+							grievancesList.Add(System.Math.Ceiling(offset) + " " + thoughtGroup.LabelCap);
+						}
+					}
+					grievances = string.Join(System.Environment.NewLine, grievancesList);
+				}
 			}
 		}
 	}

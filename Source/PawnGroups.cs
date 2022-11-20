@@ -10,6 +10,8 @@ namespace OwlBar
 	
 		public Dictionary<int, bool> groupLeaders = new Dictionary<int, bool>(); //PawnLeaderID, bool is for if the group is expanded
 		public Dictionary<int, int> groupMembers = new Dictionary<int, int>(); //PawnMemberID, PawnLeaderID
+		public Dictionary<int, int> groupCounts = new Dictionary<int, int>(); //LeaderID, member count
+		public Dictionary<int, int> groupAbsentees = new Dictionary<int, int>(); //PawnMemberID, absent from PawnLeaderID's group
 
 		public override void FinalizeInit()
 		{
@@ -19,12 +21,22 @@ namespace OwlBar
 		{
 			Scribe_Collections.Look(ref groupLeaders, "groupLeaders", LookMode.Value, LookMode.Value);
 			Scribe_Collections.Look(ref groupMembers, "groupMembers", LookMode.Value, LookMode.Value);
+			Scribe_Collections.Look(ref groupCounts, "groupCounts", LookMode.Value, LookMode.Value);
+			
+			//Validate data
+			foreach (var leader in groupLeaders)
+			{
+				if (!groupMembers.ContainsKey(leader.Key)) RemoveLeader(leader.Key);
+			}
+
 			base.ExposeData();
 		}
 
 		public void MakeLeader(int pawnID)
 		{
 			groupLeaders.Add(pawnID, false);
+			groupCounts.Add(pawnID, 1);
+			fastColonistBar.ResetCache();
 		}
 		public void RemoveLeader(int pawnID)
 		{
@@ -32,11 +44,13 @@ namespace OwlBar
 			groupMembers.RemoveAll(x => x.Value == pawnID);
 
 			groupLeaders.Remove(pawnID);
+			groupCounts.Remove(pawnID);
 			fastColonistBar.ResetCache();
 		}
 		public void JoinGroup(int pawnID, int leaderID, int groupID)
 		{
 			groupMembers.Add(pawnID, leaderID);
+			++groupCounts[leaderID];
 			
 			//Emulate a reorder request
 			int from = -1, to = -1;
@@ -52,6 +66,7 @@ namespace OwlBar
 		}
 		public void LeaveGroup(int pawnID)
 		{
+			--groupCounts[groupMembers[pawnID]];
 			groupMembers.Remove(pawnID);
 			fastColonistBar.ResetCache();
 		}

@@ -7,6 +7,7 @@ using System.Linq;
 using System.Reflection.Emit;
 using System.Reflection;
 using static OwlBar.Mod_OwlBar;
+using Settings = OwlBar.ModSettings_OwlBar;
  
 namespace OwlBar
 {
@@ -14,12 +15,12 @@ namespace OwlBar
     [HarmonyPatch(typeof(ColonistBar), nameof(ColonistBar.ColonistBarOnGUI))]
     static class Patch_ColonistBarOnGUI
     {
-        static int frames = 119; //May need 1 frame for things to finish initializing
+        static int frames = 120; //May need 1 frame for things to finish initializing
         static int frameLoops = 0;
         static bool Prefix(ColonistBar __instance)
         {
-            //Clunky, but technically faster than modulos
-            if (shortDataDirty = ++frames == 120)
+            if (!Settings.modEnabled) return true;
+            if (shortDataDirty = ++frames == 121)
             {
                 frames = 0;
                 __instance.CheckRecacheEntries();
@@ -40,7 +41,17 @@ namespace OwlBar
     {
         static bool Prefix(Rect rect, Pawn colonist, Map pawnMap, bool highlight, bool reordering)
         {
-            fastColonistBar.fastDrawer.DrawColonistFast(fastColonistBar.pawnCache, rect, colonist, pawnMap, highlight, reordering, vanillaColonistBar.cachedScale);
+            fastColonistBar.fastDrawer.DrawColonistFast(fastColonistBar.pawnCache, rect, colonist, pawnMap, highlight, reordering);
+            return false;
+        }
+    }
+
+    //We don't draw the frame but we still need to invoke it for mod's that use it like SoS2
+    [HarmonyPatch(typeof(ColonistBarColonistDrawer), nameof(ColonistBarColonistDrawer.DrawGroupFrame))]
+    static class Patch_DrawGroupFrame
+    {
+        static bool Prefix(int group)
+        {
             return false;
         }
     }
@@ -80,6 +91,7 @@ namespace OwlBar
     {
         static bool Prefix(Vector2 pos, ref Thing __result)
         {
+            if (!Settings.modEnabled) return true;
             var mousePos = Event.current.mousePosition;
             if (!Mouse.IsInputBlockedNow)
             {
@@ -89,6 +101,12 @@ namespace OwlBar
                     if (pawnCache.container.Contains(mousePos))
                     {
                         Pawn pawn = pawnCache.Pawn;
+
+                        if (fastColonistBar.selectedPawn == pawn) 
+                        {
+                            if (!Settings.relationshipAltMode || fastColonistBar.relationshipViewerEnabled) fastColonistBar.selectedPawnAlt ^= true;
+                            fastColonistBar.relationshipViewerEnabled = true;
+                        }
 
                         if (pawn != null && pawn.Dead && pawn.Corpse != null && pawn.Corpse.SpawnedOrAnyParentSpawned) __result = pawn.Corpse;
                         else __result = pawn;

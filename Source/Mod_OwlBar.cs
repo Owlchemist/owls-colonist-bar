@@ -6,9 +6,6 @@ using static OwlBar.ModSettings_OwlBar;
  
 namespace OwlBar
 {
-	#if DEBUG
-	[HotSwap.HotSwappable]
-	#endif
     public class Mod_OwlBar : Mod
 	{
 		public static OwlColonistBar fastColonistBar;
@@ -34,20 +31,24 @@ namespace OwlBar
 
 			//Listing_Standard options = new Listing_Standard();
 			options.Begin(rect);
+			if (Prefs.DevMode) options.CheckboxLabeled("DevMode: Mod enabled", ref modEnabled, null);
+			options.CheckboxLabeled("OwlBar.MoodBackgrounds".Translate(), ref moodBackgrounds, "OwlBar.MoodBackgrounds.Desc".Translate());
+			options.CheckboxLabeled("OwlBar.GoodMoodAltMode".Translate(), ref goodMoodAltMode, "OwlBar.GoodMoodAltMode.Desc".Translate());
+			options.CheckboxLabeled("OwlBar.RelationshipAltMode".Translate(), ref relationshipAltMode, "OwlBar.RelationshipAltMode.Desc".Translate());
 			options.Gap();
-			options.Label("OwlBar_Header_Icons".Translate());
+			options.Label("OwlBar.Header.Icons".Translate());
 			options.GapLine(); //======================================
-			options.CheckboxLabeled("OwlBar_ShowRoles".Translate(), ref showRoles, "OwlBar_ShowRolesDesc".Translate());
-			options.CheckboxLabeled("OwlBar_ShowHunger".Translate(), ref showHunger, "OwlBar_ShowHungerDesc".Translate());
-			if (showHunger) options.CheckboxLabeled("OwlBar_ShowHungerIfDrafted".Translate(), ref showHungerIfDrafted, "OwlBar_ShowHungerIfDraftedDesc".Translate());
-			options.CheckboxLabeled("OwlBar_ShowTired".Translate(), ref showTired, "OwlBar_ShowTiredDesc".Translate());
-			if (showTired) options.CheckboxLabeled("OwlBar_ShowTiredIfDrafted".Translate(), ref showTiredIfDrafted, "OwlBar_ShowTiredIfDraftedDesc".Translate());
+			options.CheckboxLabeled("OwlBar.ShowRoles".Translate(), ref showRoles, "OwlBar.ShowRoles.Desc".Translate());
+			options.CheckboxLabeled("OwlBar.ShowHunger".Translate(), ref showHunger, "OwlBar.ShowHunger.Desc".Translate());
+			if (showHunger) options.CheckboxLabeled("OwlBar.ShowHungerIfDrafted".Translate(), ref showHungerIfDrafted, "OwlBar.ShowHungerIfDrafted.Desc".Translate());
+			options.CheckboxLabeled("OwlBar.ShowTired".Translate(), ref showTired, "OwlBar.ShowTired.Desc".Translate());
+			if (showTired) options.CheckboxLabeled("OwlBar.ShowTiredIfDrafted".Translate(), ref showTiredIfDrafted, "OwlBar.ShowTiredIfDrafted.Desc".Translate());
 			
 			options.Gap();
-			options.Label("OwlBar_Header_Weapons".Translate());
+			options.Label("OwlBar.Header.Weapons".Translate());
 			options.GapLine(); //======================================
-			options.CheckboxLabeled("OwlBar_ShowWeapons".Translate(), ref showWeapons, "OwlBar_ShowWeaponsDesc".Translate());
-			if (showWeapons) options.CheckboxLabeled("OwlBar_ShowWeaponsIfDrafted".Translate(), ref showWeaponsIfDrafted, "OwlBar_ShowWeaponsIfDraftedDesc".Translate());
+			options.CheckboxLabeled("OwlBar.ShowWeapons".Translate(), ref showWeapons, "OwlBar.ShowWeapons.Desc".Translate());
+			if (showWeapons) options.CheckboxLabeled("OwlBar.ShowWeaponsIfDrafted".Translate(), ref showWeaponsIfDrafted, "OwlBar.ShowWeaponsIfDrafted.Desc".Translate());
 			
 
 			options.End();
@@ -57,18 +58,16 @@ namespace OwlBar
 
 		public override string SettingsCategory()
 		{
-			return "Unnamed Colonist Bar";
+			return "Owl's Colonist Bar";
 		}
 
 		public override void WriteSettings()
 		{
 			base.WriteSettings();
+			if (fastColonistBar != null) fastColonistBar.relationshipViewerEnabled = !relationshipAltMode;
 		}
 	}
 
-	#if DEBUG
-	[HotSwap.HotSwappable]
-	#endif
 	public class ModSettings_OwlBar : ModSettings
 	{
 		public override void ExposeData()
@@ -80,16 +79,15 @@ namespace OwlBar
 			Scribe_Values.Look<bool>(ref showTiredIfDrafted, "showTiredIfDrafted", true, false);
 			Scribe_Values.Look<bool>(ref showWeapons, "showWeapons", true, false);
 			Scribe_Values.Look<bool>(ref showWeaponsIfDrafted, "showWeaponsIfDrafted", true, false);
+			Scribe_Values.Look<bool>(ref moodBackgrounds, "moodbackgrounds", true, false);
+			Scribe_Values.Look<bool>(ref relationshipAltMode, "relationshipAltMode", false, false);
+			Scribe_Values.Look<bool>(ref goodMoodAltMode, "goodMoodAltMode", false, false);
+			Scribe_Values.Look<bool>(ref modEnabled, "modEnabled", true, false);
 			base.ExposeData();
 		}
 
-		public static bool showRoles = true;
-		public static bool showHunger = true;
-		public static bool showHungerIfDrafted = true;
-		public static bool showTired = true;
-		public static bool showTiredIfDrafted = true;
-		public static bool showWeapons = true;
-		public static bool showWeaponsIfDrafted = true;
+		public static bool showRoles = true, showHunger = true, showHungerIfDrafted = true, showTired = true, showTiredIfDrafted = true,
+		showWeapons = true, showWeaponsIfDrafted = true, moodBackgrounds = true, modEnabled = true, relationshipAltMode, goodMoodAltMode;
 		public static Vector2 scrollPos = Vector2.zero;
 	}
 }

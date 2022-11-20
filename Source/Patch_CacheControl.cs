@@ -20,6 +20,8 @@ namespace OwlBar
             yield return AccessTools.Method(typeof(ColonistBar), nameof(ColonistBar.DrawColonistMouseAttachment));
             //If colonist portrait was just re-ordered...
             yield return AccessTools.Method(typeof(ColonistBar), nameof(ColonistBar.Reorder));
+            //If a colonist changes apparel
+            yield return AccessTools.Method(typeof(Pawn_ApparelTracker), nameof(Pawn_ApparelTracker.Notify_ApparelChanged));
         }
 
         static void Postfix()
