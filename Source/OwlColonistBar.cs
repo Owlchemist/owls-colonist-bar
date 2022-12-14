@@ -4,7 +4,6 @@ using Verse;
 using Verse.Sound;
 using RimWorld;
 using RimWorld.Planet;
-using System.Linq;
 using static RimWorld.ColonistBar;
 using static OwlBar.Mod_OwlBar;
 using static OwlBar.FastGUI;
@@ -28,7 +27,7 @@ namespace OwlBar
 		public Pawn selectedPawn;
 		public bool selectedPawnAlt;
 		public bool relationshipViewerEnabled = true;
-		public HashSet<int> selectedPawnsLovers;
+		public HashSet<int> selectedPawnsLovers = new HashSet<int>();
 		public float labelMaxWidth = 70f;
 		public List<object> selectorBuffer;
 		public bool worldRender, showWeapon, showGroupFrames;
@@ -48,8 +47,24 @@ namespace OwlBar
 			colonistBarCache = new PawnCache[vanillaColonistBar.cachedDrawLocs.Count];
 		}
 		
+		static int frames = 120; //May need 1 frame for things to finish initializing
+        static int frameLoops = 0;
 		public void ColonistBarOnGUI()
 		{
+			//Prepare
+            if (shortDataDirty = ++frames == 121)
+            {
+                frames = 0;
+                vanillaColonistBar.CheckRecacheEntries();
+                if (++frameLoops == 20)
+                {
+                    frameLoops = 0;
+                    fastColonistBar.ResetCache();
+                }
+            }
+            if (vanillaColonistBar.Visible) 
+
+			//Begin
 			eventCurrent = Event.current;
 			if (eventCurrent.type != EventType.Layout)
 			{
@@ -91,8 +106,7 @@ namespace OwlBar
 					if (entry.pawn == null) continue; //Failsafe					
 
 					//Check if they're in a group and if the group is expanded or not
-					int leaderID = -1;
-					if (pawnGroups.groupMembers.TryGetValue(entry.pawn.thingIDNumber, out leaderID) && !pawnGroups.groupLeaders[leaderID])
+					if (pawnGroups.groupMembers.TryGetValue(entry.pawn.thingIDNumber, out int leaderID) && !pawnGroups.groupLeaders[leaderID])
 					{
 						++skipped;
 						continue;
@@ -136,14 +150,18 @@ namespace OwlBar
 					
 					//Finally draw
 					showWeapon = Settings.showWeapons && pawnCache.weapon != null && (!Settings.showWeaponsIfDrafted || pawnCache.drafted);
-					if (eventCurrent.type == EventType.Repaint) vanillaColonistBar.drawer.DrawColonist(pawnCache.container, entry.pawn, entry.map, vanillaColonistBar.colonistsToHighlight.Contains(entry.pawn), reordering);
+					if (eventCurrent.type == EventType.Repaint) {
+						//First invoke the vanilla drawer. Not actually used, just prompting other mod's harmony patches to pre/postfix.
+						vanillaColonistBar.drawer.DrawColonist(pawnCache.container, entry.pawn, entry.map, vanillaColonistBar.colonistsToHighlight.Contains(entry.pawn), reordering);
+						//Use our replacement method
+						fastColonistBar.fastDrawer.DrawColonistFast(fastColonistBar.pawnCache, pawnCache.container, entry.pawn, entry.map, vanillaColonistBar.colonistsToHighlight.Contains(entry.pawn), reordering);
+					}
 
 					//Manage the weapon draw queue
 					if (showWeapon) weaponDrawQueue.Add(i);
 
 					//Check if a group icon should be generated
-					bool groupExpanded;
-					if (pawnGroups.groupLeaders.TryGetValue(entry.pawn.thingIDNumber, out groupExpanded))
+					if (pawnGroups.groupLeaders.TryGetValue(entry.pawn.thingIDNumber, out bool groupExpanded))
 					{
 						//Draw lines
 						if (groupExpanded)
@@ -225,17 +243,28 @@ namespace OwlBar
 		void HandleSelectedPawns()
 		{
 			selectedPawn = null; //reset
+			selectedPawnsLovers.Clear();
 			int selectedPawnsCount = 0;
-			for (int i = 0; i < selectorBuffer.Count; ++i)
+			int length = selectorBuffer.Count;
+			for (int i = 0; i < length; ++i)
 			{
-				if (selectorBuffer[i].GetType() == typeof(Pawn)) ++selectedPawnsCount;
+				if (selectorBuffer[i] is Pawn isPawn)
+				{
+					if (selectedPawn == null) selectedPawn = isPawn;
+					if (++selectedPawnsCount == 2)
+					{
+						selectedPawn = null;
+						break; //Don't care if there's more than 2
+					}
+				} 
 			}
 
 			if (selectedPawnsCount == 1)
 			{
-				selectedPawn = selectorBuffer.FirstOrDefault(x => x.GetType() == typeof(Pawn)) as Pawn;
-				if (selectedPawn.relations != null) selectedPawnsLovers = selectedPawn.GetLoveRelations(false).Select(x => x.otherPawn.thingIDNumber).ToHashSet();
-				else selectedPawn = null;
+				foreach (var lover in selectedPawn.GetLoveRelations(false))
+				{
+					selectedPawnsLovers.Add(lover.otherPawn.thingIDNumber);
+				}
 			}
 			else if (Settings.relationshipAltMode) fastColonistBar.relationshipViewerEnabled = false;
 		}
@@ -285,7 +314,7 @@ namespace OwlBar
 				if (eventCurrent.type == EventType.MouseDown) eventCurrent.Use();
 				else if (eventCurrent.type == EventType.MouseUp)
 				{
-					List<FloatMenuOption> righClickMenu = HandleRightClick(pawn).ToList<FloatMenuOption>();
+					List<FloatMenuOption> righClickMenu = new List<FloatMenuOption>(HandleRightClick(pawn));
 					if (righClickMenu.Count != 0)
 					{
 						Find.WindowStack.Add(new FloatMenu(righClickMenu));

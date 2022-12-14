@@ -12,7 +12,6 @@ namespace OwlBar
 		public static ColonistBar vanillaColonistBar;
 		public static PawnGroups pawnGroups;
 		static public bool shortDataDirty = false;
-		//static public int frameID;
 
 		public Mod_OwlBar(ModContentPack content) : base(content)
 		{
@@ -31,7 +30,6 @@ namespace OwlBar
 
 			//Listing_Standard options = new Listing_Standard();
 			options.Begin(rect);
-			if (Prefs.DevMode) options.CheckboxLabeled("DevMode: Mod enabled", ref modEnabled, null);
 			options.CheckboxLabeled("OwlBar.MoodBackgrounds".Translate(), ref moodBackgrounds, "OwlBar.MoodBackgrounds.Desc".Translate());
 			options.CheckboxLabeled("OwlBar.GoodMoodAltMode".Translate(), ref goodMoodAltMode, "OwlBar.GoodMoodAltMode.Desc".Translate());
 			options.CheckboxLabeled("OwlBar.RelationshipAltMode".Translate(), ref relationshipAltMode, "OwlBar.RelationshipAltMode.Desc".Translate());
@@ -72,22 +70,21 @@ namespace OwlBar
 	{
 		public override void ExposeData()
 		{
-			Scribe_Values.Look<bool>(ref showRoles, "showRoles", true, false);
-			Scribe_Values.Look<bool>(ref showHunger, "showHunger", true, false);
-			Scribe_Values.Look<bool>(ref showHungerIfDrafted, "showHungerIfDrafted", true, false);
-			Scribe_Values.Look<bool>(ref showTired, "showTired", true, false);
-			Scribe_Values.Look<bool>(ref showTiredIfDrafted, "showTiredIfDrafted", true, false);
-			Scribe_Values.Look<bool>(ref showWeapons, "showWeapons", true, false);
-			Scribe_Values.Look<bool>(ref showWeaponsIfDrafted, "showWeaponsIfDrafted", true, false);
-			Scribe_Values.Look<bool>(ref moodBackgrounds, "moodbackgrounds", true, false);
-			Scribe_Values.Look<bool>(ref relationshipAltMode, "relationshipAltMode", false, false);
-			Scribe_Values.Look<bool>(ref goodMoodAltMode, "goodMoodAltMode", false, false);
-			Scribe_Values.Look<bool>(ref modEnabled, "modEnabled", true, false);
+			Scribe_Values.Look<bool>(ref showRoles, "showRoles", true);
+			Scribe_Values.Look<bool>(ref showHunger, "showHunger", true);
+			Scribe_Values.Look<bool>(ref showHungerIfDrafted, "showHungerIfDrafted", true);
+			Scribe_Values.Look<bool>(ref showTired, "showTired", true);
+			Scribe_Values.Look<bool>(ref showTiredIfDrafted, "showTiredIfDrafted", true);
+			Scribe_Values.Look<bool>(ref showWeapons, "showWeapons", true);
+			Scribe_Values.Look<bool>(ref showWeaponsIfDrafted, "showWeaponsIfDrafted", true);
+			Scribe_Values.Look<bool>(ref moodBackgrounds, "moodbackgrounds", true);
+			Scribe_Values.Look<bool>(ref relationshipAltMode, "relationshipAltMode");
+			Scribe_Values.Look<bool>(ref goodMoodAltMode, "goodMoodAltMode");
 			base.ExposeData();
 		}
 
 		public static bool showRoles = true, showHunger = true, showHungerIfDrafted = true, showTired = true, showTiredIfDrafted = true,
-		showWeapons = true, showWeaponsIfDrafted = true, moodBackgrounds = true, modEnabled = true, relationshipAltMode, goodMoodAltMode;
+		showWeapons = true, showWeaponsIfDrafted = true, moodBackgrounds = true, relationshipAltMode, goodMoodAltMode;
 		public static Vector2 scrollPos = Vector2.zero;
 	}
 }

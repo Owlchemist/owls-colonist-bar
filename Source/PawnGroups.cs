@@ -1,5 +1,6 @@
 using Verse;
 using System.Collections.Generic;
+using System.Linq;
 using static OwlBar.Mod_OwlBar;
 
 namespace OwlBar
@@ -24,9 +25,10 @@ namespace OwlBar
 			Scribe_Collections.Look(ref groupCounts, "groupCounts", LookMode.Value, LookMode.Value);
 			
 			//Validate data
-			foreach (var leader in groupLeaders)
+			var workingList = groupLeaders.Keys;
+			foreach (var leader in workingList)
 			{
-				if (!groupMembers.ContainsKey(leader.Key)) RemoveLeader(leader.Key);
+				if (!groupMembers.ContainsKey(leader)) RemoveLeader(leader);
 			}
 
 			base.ExposeData();

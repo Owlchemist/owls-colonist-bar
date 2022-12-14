@@ -13,35 +13,23 @@ namespace OwlBar
 {
     //Do not go to the vanilla bar, use ours instead. This may be destructive and something to revisit later if it's too much of a compatibiltiy problem
     [HarmonyPatch(typeof(ColonistBar), nameof(ColonistBar.ColonistBarOnGUI))]
-    static class Patch_ColonistBarOnGUI
+    static class Replace_ColonistBarOnGUI
     {
-        static int frames = 120; //May need 1 frame for things to finish initializing
-        static int frameLoops = 0;
-        static bool Prefix(ColonistBar __instance)
+        static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
         {
-            if (!Settings.modEnabled) return true;
-            if (shortDataDirty = ++frames == 121)
-            {
-                frames = 0;
-                __instance.CheckRecacheEntries();
-                if (++frameLoops == 20)
-                {
-                    frameLoops = 0;
-                    fastColonistBar.ResetCache();
-                }
-            }
-            if (__instance.Visible) fastColonistBar.ColonistBarOnGUI();
-            return false;
+            yield return new CodeInstruction(OpCodes.Ldsfld, AccessTools.Field(typeof(Mod_OwlBar), nameof(Mod_OwlBar.fastColonistBar)));
+            yield return new CodeInstruction(OpCodes.Callvirt, typeof(OwlColonistBar).GetMethod(nameof(OwlColonistBar.ColonistBarOnGUI)));
+            yield return new CodeInstruction(OpCodes.Ret);
         }
     }
 
     //Instead of going directly to our own drawer, we pass through the vanilla drawer first to allow postfix patches from other mods to do their thing, like Pawn Badges
     [HarmonyPatch(typeof(ColonistBarColonistDrawer), nameof(ColonistBarColonistDrawer.DrawColonist))]
+    [HarmonyPriority(Priority.Last)]
     static class Patch_DrawColonist
     {
-        static bool Prefix(Rect rect, Pawn colonist, Map pawnMap, bool highlight, bool reordering)
+        static bool Prefix()
         {
-            fastColonistBar.fastDrawer.DrawColonistFast(fastColonistBar.pawnCache, rect, colonist, pawnMap, highlight, reordering);
             return false;
         }
     }
@@ -58,7 +46,7 @@ namespace OwlBar
 
     //This changes the vanilla portait icon code to only fetch the icons into its list, but removes the actual drawing portion.
     [HarmonyPatch(typeof(ColonistBarColonistDrawer), nameof(ColonistBarColonistDrawer.DrawIcons))]
-    static class Patch_PathFinder
+    static class Patch_DrawIcons
     {
         static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator il)
         {
@@ -87,11 +75,10 @@ namespace OwlBar
 
     //This is how click selects target a pawn in the bar. Vanilla code relies on position -> entry but since we fudge the positioning we need to take it over.
     [HarmonyPatch(typeof(ColonistBar), nameof(ColonistBar.ColonistOrCorpseAt))]
-    static class Patch_ColonistOrCorpseAt
+    static class Replace_ColonistOrCorpseAt
     {
-        static bool Prefix(Vector2 pos, ref Thing __result)
+        static bool Prefix(Vector2 pos, ref Thing __result) //Needs to be a ref due to changing the pointer
         {
-            if (!Settings.modEnabled) return true;
             var mousePos = Event.current.mousePosition;
             if (!Mouse.IsInputBlockedNow)
             {

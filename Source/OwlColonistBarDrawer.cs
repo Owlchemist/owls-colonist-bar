@@ -1,7 +1,6 @@
 using RimWorld.Planet;
 using UnityEngine;
 using Verse;
-using System.Linq;
 using RimWorld;
 using static OwlBar.Mod_OwlBar;
 using static OwlBar.FastGUI;
@@ -104,9 +103,12 @@ namespace OwlBar
 				Pawn from = fastColonistBar.selectedPawnAlt ? pawn : fastColonistBar.selectedPawn;
 				Pawn to = fastColonistBar.selectedPawnAlt ? fastColonistBar.selectedPawn : pawn;
 
-				if (fastColonistBar.selectedPawnAlt)
+				if (fastColonistBar.selectedPawnAlt && pawn.relations != null)
 				{
-					if (pawn.relations != null) fastColonistBar.selectedPawnsLovers = pawn.GetLoveRelations(false).Select(x => x.otherPawn.thingIDNumber).ToHashSet();
+					foreach (var lover in pawn.GetLoveRelations(false))
+					{
+						fastColonistBar.selectedPawnsLovers.Add(lover.otherPawn.thingIDNumber);
+					}
 				}
 				if (fastColonistBar.selectedPawnsLovers.Contains(to.thingIDNumber))
 				{
