@@ -140,7 +140,7 @@ namespace OwlBar
                     {
                         Pawn pawn = pawnCache.Pawn;
 
-                        if (OwlColonistBar._instance._selectedPawn == pawn) 
+                        if (OwlColonistBar._instance.selectedPawn == pawn) 
                         {
                             if (!Settings.relationshipAltMode || OwlColonistBar._instance.relationshipViewerEnabled) OwlColonistBar._instance.selectedPawnAlt ^= true;
                             OwlColonistBar._instance.relationshipViewerEnabled = true;

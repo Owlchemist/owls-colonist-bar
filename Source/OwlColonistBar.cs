@@ -23,7 +23,7 @@ namespace OwlBar
 		static int frames = 120, frameLoops;
 
 		public static OwlColonistBar _instance;
-		public Pawn _selectedPawn;
+		public Pawn selectedPawn;
 		public PawnGroups pawnGroups;
 
 		public OwlColonistBar()
@@ -391,7 +391,7 @@ namespace OwlBar
 					}
 				} 
 			}
-			_selectedPawn = selectedPawn;
+			this.selectedPawn = selectedPawn;
 
 			if (selectedPawnsCount == 1 && selectedPawn.relations != null)
 			{

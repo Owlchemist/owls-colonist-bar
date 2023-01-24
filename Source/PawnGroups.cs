@@ -25,6 +25,10 @@ namespace OwlBar
 			Scribe_Collections.Look(ref groupCounts, "groupCounts", LookMode.Value, LookMode.Value);
 			
 			//Validate data
+			if (groupLeaders == null) groupLeaders = new Dictionary<int, bool>();
+			if (groupMembers == null) groupMembers = new Dictionary<int, int>();
+			if (groupCounts == null) groupCounts = new Dictionary<int, int>();
+			
 			var workingList = groupLeaders.Keys;
 			foreach (var leader in workingList)
 			{
