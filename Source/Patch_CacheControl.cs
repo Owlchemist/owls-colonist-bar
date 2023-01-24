@@ -1,8 +1,8 @@
 using HarmonyLib;
 using RimWorld;
+using Verse;
 using System.Collections.Generic;
 using System.Reflection;
-using static OwlBar.Mod_OwlBar;
  
 namespace OwlBar
 {
@@ -25,7 +25,7 @@ namespace OwlBar
 
         static void Postfix()
         {
-            fastColonistBar?.ResetCache();
+            if (Current.ProgramState == ProgramState.Playing) OwlColonistBar._instance?.ResetCache(Find.ColonistBar);
         }
     }
 }

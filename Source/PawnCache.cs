@@ -11,7 +11,7 @@ namespace OwlBar
 {
 	public class PawnCache
 	{
-		public PawnCache(Pawn pawn, Vector2 cachedDrawLocs, int worldGroupID, int skipped, int i)
+		public PawnCache(Pawn pawn, Vector2 cachedDrawLocs, int worldGroupID, int skipped, int i, float labelMaxWidth)
 		{
 			entryIndex = i;
 			ID = pawn.thingIDNumber;
@@ -28,14 +28,14 @@ namespace OwlBar
 			weaponRect.x += 5f * 1f;
 			
 			//Label stuff
-			label = GenMapUI.GetPawnLabel(pawn, fastColonistBar.labelMaxWidth, vanillaColonistBar.drawer.pawnLabelsCache, 0); 
+			label = GenMapUI.GetPawnLabel(pawn, labelMaxWidth, Find.ColonistBar.drawer.pawnLabelsCache, 0); 
 			labelPos = new Vector2(container.center.x, container.yMax - 4f * 1f);
-			labelWidth = GenMapUI.GetPawnLabelNameWidth(pawn, fastColonistBar.labelMaxWidth, vanillaColonistBar.drawer.pawnLabelsCache, 0);
+			labelWidth = GenMapUI.GetPawnLabelNameWidth(pawn, labelMaxWidth, Find.ColonistBar.drawer.pawnLabelsCache, 0);
 			labelBGRect = new Rect(labelPos.x - labelWidth / 2f - 4f, labelPos.y, labelWidth + 8f, 12f);
 			labelRect = new Rect(labelBGRect.center.x - labelWidth / 2f, labelBGRect.y - 2f, labelWidth, 100f);
 
 			//Group leader check
-			if (pawnGroups.groupLeaders.ContainsKey(ID))
+			if (OwlColonistBar._instance.pawnGroups.groupLeaders.ContainsKey(ID))
 			{
 				groupRect = container;
 				groupRect.x += container.width;
@@ -43,7 +43,7 @@ namespace OwlBar
 			}
 
 			lastWorldGroupID = worldGroupID; //Checked each loop to determine if data is dirty
-			FetchShortCache(pawn, false);
+			FetchShortCache(pawn, labelMaxWidth, false);
 		}
 		public Texture portrait;
 		public string label;
@@ -53,14 +53,14 @@ namespace OwlBar
 		public int lastWorldGroupID, entryIndex, ID, cacheReorderableGroup;
 		
 		//Short cache, refreshed every 120 frames (2~ seconds)
-		public void FetchShortCache(Pawn pawn, bool shortOnly = true)
+		public void FetchShortCache(Pawn pawn, float labelMaxWidth, bool shortOnly = true)
 		{
 			dead = pawn.Dead;
 			drafted = pawn.Drafted;
 			CacheMoodData(pawn);
 
 			//Icons
-			vanillaColonistBar.drawer.DrawIcons(portraitRect, pawn);
+			Find.ColonistBar.drawer.DrawIcons(portraitRect, pawn);
 			iconCount = ColonistBarColonistDrawer.tmpIconsToDraw?.Count ?? 0;
 			for (int i = 0; i < iconCount; ++i)
 			{
@@ -82,7 +82,7 @@ namespace OwlBar
 			}
 			iconCache = ColonistBarColonistDrawer.tmpIconsToDraw?.ToArray();
 			iconGap = Mathf.Min(BaseIconAreaWidth / (float)iconCount, BaseIconMaxSize) * 1f;
-			iconRect = new Rect(portraitRect.x + 1f, portraitRect.yMax - iconGap - 1f, iconGap, iconGap);
+			iconRect = new Rect(portraitRect.m_XMin + 1f, portraitRect.yMax - iconGap - 1f, iconGap, iconGap);
 
 			//Label color
 			labelColor = PawnNameColorUtility.PawnNameColorOf(pawn);
@@ -95,17 +95,17 @@ namespace OwlBar
 				weaponIcon = (weapon.Graphic.ExtractInnerGraphicFor(weapon).MatSingle.mainTexture as Texture2D) ?? weapon.def.uiIcon;
 				
 				//Weapon rect
-				Vector2 vector = GUIClip.Unclip(new Vector2(container.xMin + container.width / 2f, container.yMin + container.height / 2f) * Prefs.UIScale);
+				Vector2 vector = GUIClip.Unclip(new Vector2(container.m_XMin + container.width / 2f, container.m_YMin + container.height / 2f) * Prefs.UIScale);
 				weaponMatrix = Matrix4x4.TRS(vector, Quaternion.Euler(0f, 0f, weapon.def.equippedAngleOffset +50f), Vector3.one) * Matrix4x4.TRS(-vector, Quaternion.identity, Vector3.one) * GUI.matrix;
 			}
 
 			//Bleeding
-			if (pawn.health.hediffSet.BleedRateTotal > 1f)
+			if (pawn.health.hediffSet.cachedBleedRate > 1f)
 			{
 				//These need to be reset to their original values
 				if (shortOnly)
 				{
-					label = GenMapUI.GetPawnLabel(pawn, fastColonistBar.labelMaxWidth, vanillaColonistBar.drawer.pawnLabelsCache, 0); 
+					label = GenMapUI.GetPawnLabel(pawn, labelMaxWidth, Find.ColonistBar.drawer.pawnLabelsCache, 0); 
 					labelBGRect = new Rect(labelPos.x - labelWidth / 2f - 4f, labelPos.y, labelWidth + 8f, 12f);
 				}
 				labelColor = ResourceBank.colorRed;

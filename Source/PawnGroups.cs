@@ -16,7 +16,7 @@ namespace OwlBar
 
 		public override void FinalizeInit()
 		{
-			pawnGroups = this;
+			OwlColonistBar._instance.pawnGroups = this;
 		}
 		public override void ExposeData()
 		{
@@ -38,7 +38,7 @@ namespace OwlBar
 		{
 			groupLeaders.Add(pawnID, false);
 			groupCounts.Add(pawnID, 1);
-			fastColonistBar.ResetCache();
+			OwlColonistBar._instance.ResetCache(Find.ColonistBar);
 		}
 		public void RemoveLeader(int pawnID)
 		{
@@ -47,7 +47,7 @@ namespace OwlBar
 
 			groupLeaders.Remove(pawnID);
 			groupCounts.Remove(pawnID);
-			fastColonistBar.ResetCache();
+			OwlColonistBar._instance.ResetCache(Find.ColonistBar);
 		}
 		public void JoinGroup(int pawnID, int leaderID, int groupID)
 		{
@@ -56,21 +56,21 @@ namespace OwlBar
 			
 			//Emulate a reorder request
 			int from = -1, to = -1;
-			foreach (var item in fastColonistBar.colonistBarCache)
+			foreach (var item in OwlColonistBar._instance.colonistBarCache)
 			{
 				if (item == null) continue;
 				if (item.ID == pawnID) from = item.entryIndex;
 				if (item.ID == leaderID) to = item.entryIndex + 1;
 			}
-			vanillaColonistBar.Reorder(from, to, groupID);
+			Find.ColonistBar.Reorder(from, to, groupID);
 
-			fastColonistBar.ResetCache();
+			OwlColonistBar._instance.ResetCache(Find.ColonistBar);
 		}
 		public void LeaveGroup(int pawnID)
 		{
 			--groupCounts[groupMembers[pawnID]];
 			groupMembers.Remove(pawnID);
-			fastColonistBar.ResetCache();
+			OwlColonistBar._instance.ResetCache(Find.ColonistBar);
 		}
 	}
 }

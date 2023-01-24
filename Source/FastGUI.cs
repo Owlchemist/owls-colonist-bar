@@ -5,7 +5,7 @@ namespace OwlBar
 {
 	internal static class FastGUI
 	{
-		static Internal_DrawTextureArguments drawArguments = new Internal_DrawTextureArguments
+		static public Internal_DrawTextureArguments drawArguments = new Internal_DrawTextureArguments
 		{
 			leftBorder = 0,
 			rightBorder = 0,
@@ -20,8 +20,7 @@ namespace OwlBar
 			sourceRect = new Rect(0f, 0f, 1f, 1f),
 			mat = GUI.roundedRectMaterial
 		};
-		public static float currentTransparency = 1f;
-		public static void DrawTextureFast(Rect position, Texture image, Vector4 borderWidth, Color color)
+		public static void DrawTextureFast(Internal_DrawTextureArguments drawArguments, Rect position, Texture image, Vector4 borderWidth, Color color, float currentTransparency)
 		{
 			//Basic
 			drawArguments.screenRect = position;

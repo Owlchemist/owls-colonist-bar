@@ -3,7 +3,7 @@
 	<OwlBar.Header.Icons>Icons:</OwlBar.Header.Icons>
 	<OwlBar.Header.Weapons>Weapons:</OwlBar.Header.Weapons>
 	
-	<OwlBar.ShowRoles>Show role icons (Ideology)</OwlBar.ShowRoles>
+	<OwlBar.ShowRoles>Show role icons</OwlBar.ShowRoles>
 	<OwlBar.ShowRoles.Desc>Controls whether or not you want ideology role icons, such as leader or specialist, to show in the pawn portrait. This feature was added because normally icons represent temporarily effects, but the DLC deviates from this by including more permanent ones.</OwlBar.ShowRoles.Desc>
 	
 	<OwlBar.ShowHunger>Show hunger icon</OwlBar.ShowHunger>
@@ -39,4 +39,8 @@
 	<OwlBar.Icon.Hungry>Pawn is hungry</OwlBar.Icon.Hungry>
 	<OwlBar.Icon.Tired>Pawn is tired</OwlBar.Icon.Tired>
 	<OwlBar.Icon.Bleeding>Pawn is bleeding</OwlBar.Icon.Bleeding>
+	
+	<OwlBar.EntriesPerRow>Pawns per row: {0}</OwlBar.EntriesPerRow>
+	<OwlBar.MaxRows>Maximum rows: {0}</OwlBar.MaxRows>
+	<OwlBar.EntryScale>Portrait scale: {0}</OwlBar.EntryScale>
 </LanguageData>
