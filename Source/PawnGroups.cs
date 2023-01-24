@@ -1,41 +1,64 @@
 using Verse;
 using System.Collections.Generic;
 using System.Linq;
-using static OwlBar.Mod_OwlBar;
 
 namespace OwlBar
 {
 	public class PawnGroups : GameComponent
     {
-        public PawnGroups(Game game) {}
+        public PawnGroups(Game game)
+		{
+			if (OwlColonistBar._instance == null) new OwlColonistBar(this);
+			else OwlColonistBar._instance.pawnGroups = this;
+			groupLeaders = new Dictionary<int, bool>();
+			groupMembers = new Dictionary<int, int>();
+			groupCounts = new Dictionary<int, int>();
+		}
 	
-		public Dictionary<int, bool> groupLeaders = new Dictionary<int, bool>(); //PawnLeaderID, bool is for if the group is expanded
-		public Dictionary<int, int> groupMembers = new Dictionary<int, int>(); //PawnMemberID, PawnLeaderID
-		public Dictionary<int, int> groupCounts = new Dictionary<int, int>(); //LeaderID, member count
-		public Dictionary<int, int> groupAbsentees = new Dictionary<int, int>(); //PawnMemberID, absent from PawnLeaderID's group
-
+		public Dictionary<int, bool> groupLeaders; //PawnLeaderID, bool is for if the group is expanded
+		public Dictionary<int, int> groupMembers; //PawnMemberID, PawnLeaderID
+		public Dictionary<int, int> groupCounts; //LeaderID, member count
+		//public Dictionary<int, int> groupAbsentees; //PawnMemberID, absent from PawnLeaderID's group
+		
 		public override void FinalizeInit()
 		{
-			OwlColonistBar._instance.pawnGroups = this;
+			
 		}
+		
 		public override void ExposeData()
 		{
 			Scribe_Collections.Look(ref groupLeaders, "groupLeaders", LookMode.Value, LookMode.Value);
 			Scribe_Collections.Look(ref groupMembers, "groupMembers", LookMode.Value, LookMode.Value);
 			Scribe_Collections.Look(ref groupCounts, "groupCounts", LookMode.Value, LookMode.Value);
-			
-			//Validate data
-			if (groupLeaders == null) groupLeaders = new Dictionary<int, bool>();
-			if (groupMembers == null) groupMembers = new Dictionary<int, int>();
-			if (groupCounts == null) groupCounts = new Dictionary<int, int>();
-			
-			var workingList = groupLeaders.Keys;
-			foreach (var leader in workingList)
+
+			//Validate save data isn't empty
+			if (Scribe.mode == LoadSaveMode.PostLoadInit)
 			{
-				if (!groupMembers.ContainsKey(leader)) RemoveLeader(leader);
+				if (groupLeaders == null) groupLeaders = new Dictionary<int, bool>();
+				if (groupMembers == null) groupMembers = new Dictionary<int, int>();
+				if (groupCounts == null) groupCounts = new Dictionary<int, int>();
 			}
 
 			base.ExposeData();
+		}
+
+		public void ValidateAllLeaders()
+		{
+			foreach (var leader in groupLeaders.Keys.ToList())
+			{
+				if (ValidateLeader(leader)) continue;
+
+				Log.Warning("[Owl's Colonist Bar] removing pawnID #" + leader.ToString() + " as group leader. Did this pawn not load in on save reload?");
+				RemoveLeader(leader);
+			}
+		}
+		bool ValidateLeader(int pawnID)
+		{
+			foreach (var entry in Find.ColonistBar.cachedEntries)
+			{
+				if (entry.pawn?.thingIDNumber == pawnID) return true;
+			}
+			return false;
 		}
 
 		public void MakeLeader(int pawnID)
@@ -51,7 +74,7 @@ namespace OwlBar
 
 			groupLeaders.Remove(pawnID);
 			groupCounts.Remove(pawnID);
-			OwlColonistBar._instance.ResetCache(Find.ColonistBar);
+			LongEventHandler.QueueLongEvent(() => OwlColonistBar._instance.ResetCache(Find.ColonistBar), null, false, null);
 		}
 		public void JoinGroup(int pawnID, int leaderID, int groupID)
 		{

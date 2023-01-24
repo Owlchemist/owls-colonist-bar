@@ -26,9 +26,10 @@ namespace OwlBar
 		public Pawn selectedPawn;
 		public PawnGroups pawnGroups;
 
-		public OwlColonistBar()
+		public OwlColonistBar(PawnGroups pawnGroups)
 		{
 			_instance = this;
+			this.pawnGroups = pawnGroups;
 		}
 		public void ResetCache(ColonistBar cb)
 		{
@@ -50,6 +51,7 @@ namespace OwlBar
                 if (++frameLoops == 20)
                 {
                     frameLoops = 0;
+					pawnGroups.ValidateAllLeaders();
                     ResetCache(_vanillaInstance);
                 }
             }
@@ -95,11 +97,10 @@ namespace OwlBar
 					entry = _vanillaInstance.cachedEntries[i];
 					int group = entry.group;
 					Pawn pawn = entry.pawn;
+					if (pawn == null) continue; //Failsafe
 
 					//Invoke the group frame. We don't use this but this is for mod support like SoS2
 					_vanillaInstance.drawer.DrawGroupFrame(group);
-
-					if (pawn == null) continue; //Failsafe					
 
 					//Check if they're in a group and if the group is expanded or not
 					if (pawnGroups.groupMembers.TryGetValue(pawn.thingIDNumber, out int leaderID) && !pawnGroups.groupLeaders[leaderID])
