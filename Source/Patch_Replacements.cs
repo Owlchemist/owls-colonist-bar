@@ -59,7 +59,7 @@ namespace OwlBar
 			maxPerGlobalRow = Settings.entriesPerRow;
 			List<ColonistBar.Entry> entries = __instance.ColonistBar.Entries;
 			int failsafe = 100;
-			while (--failsafe != 00)
+			while (--failsafe != 0)
 			{
 				onlyOneRow = true;
 				if (__instance.TryDistributeHorizontalSlotsBetweenGroups(maxPerGlobalRow, groupsCount))
@@ -74,7 +74,7 @@ namespace OwlBar
 						{
 							group = entry.group;
 							int groupRowCount = (int)System.Math.Ceiling((float)__instance.entriesInGroup[entry.group] / (float)__instance.horizontalSlotsPerGroup[entry.group]);
-							onlyOneRow = groupRowCount == 1;
+							if (groupRowCount > 1) onlyOneRow = false;
 							if (groupRowCount > Settings.maxRows)
 							{
 								finished = false;
@@ -130,20 +130,25 @@ namespace OwlBar
     {
         static bool Prefix(Vector2 pos, ref Thing __result) //Needs to be a ref due to changing the pointer
         {
-            var mousePos = Event.current.mousePosition;
+            var oBar = OwlColonistBar._instance;
             if (!Mouse.IsInputBlockedNow)
             {
-                foreach (var pawnCache in OwlColonistBar._instance.colonistBarCache)
+                if (oBar.colonistBarCache == null) oBar.ResetCache(Find.ColonistBar);
+                var mousePos = Event.current.mousePosition;
+                for (int i = 0; i < oBar.colonistBarCache.Length; i++)
                 {
+                    PawnCache pawnCache;
+                    pawnCache = oBar.colonistBarCache[i];
+                    
                     if (pawnCache == null) continue;
                     if (pawnCache.container.Contains(mousePos))
                     {
                         Pawn pawn = pawnCache.Pawn;
 
-                        if (OwlColonistBar._instance.selectedPawn == pawn) 
+                        if (oBar.selectedPawn == pawn) 
                         {
-                            if (!Settings.relationshipAltMode || OwlColonistBar._instance.relationshipViewerEnabled) OwlColonistBar._instance.selectedPawnAlt ^= true;
-                            OwlColonistBar._instance.relationshipViewerEnabled = true;
+                            if (!Settings.relationshipAltMode || oBar.relationshipViewerEnabled) oBar.selectedPawnAlt ^= true;
+                            oBar.relationshipViewerEnabled = true;
                         }
 
                         if (pawn != null && pawn.Dead && pawn.Corpse != null && pawn.Corpse.SpawnedOrAnyParentSpawned) __result = pawn.Corpse;

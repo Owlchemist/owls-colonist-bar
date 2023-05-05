@@ -37,6 +37,8 @@ namespace OwlBar
 			options.CheckboxLabeled("OwlBar.MoodBackgrounds".Translate(), ref moodBackgrounds, "OwlBar.MoodBackgrounds.Desc".Translate());
 			options.CheckboxLabeled("OwlBar.GoodMoodAltMode".Translate(), ref goodMoodAltMode, "OwlBar.GoodMoodAltMode.Desc".Translate());
 			options.CheckboxLabeled("OwlBar.RelationshipAltMode".Translate(), ref relationshipAltMode, "OwlBar.RelationshipAltMode.Desc".Translate());
+			options.CheckboxLabeled("OwlBar.DrawWeaponsBelow".Translate(), ref drawWeaponsBelow, "OwlBar.DrawWeaponsBelow.Desc".Translate());
+			options.CheckboxLabeled("OwlBar.CompatMode".Translate(), ref compatMode, "OwlBar.CompatMode.Desc".Translate());
 			options.Gap();
 			options.Label("OwlBar.Header.Icons".Translate());
 			options.GapLine(); //======================================
@@ -46,16 +48,9 @@ namespace OwlBar
 			options.CheckboxLabeled("OwlBar.ShowTired".Translate(), ref showTired, "OwlBar.ShowTired.Desc".Translate());
 			if (showTired) options.CheckboxLabeled("OwlBar.ShowTiredIfDrafted".Translate(), ref showTiredIfDrafted, "OwlBar.ShowTiredIfDrafted.Desc".Translate());
 			
-			options.Gap();
-			options.Label("OwlBar.Header.Weapons".Translate());
-			options.GapLine(); //======================================
-			options.CheckboxLabeled("OwlBar.ShowWeapons".Translate(), ref showWeapons, "OwlBar.ShowWeapons.Desc".Translate());
-			if (showWeapons) options.CheckboxLabeled("OwlBar.ShowWeaponsIfDrafted".Translate(), ref showWeaponsIfDrafted, "OwlBar.ShowWeaponsIfDrafted.Desc".Translate());
-			
 
 			options.End();
 			Widgets.EndScrollView();
-			base.DoSettingsWindowContents(inRect);
 
 			//Refresh the bar in case the scale is changing
 			if (Current.ProgramState == ProgramState.Playing && Find.ColonistBar != null) Find.ColonistBar.entriesDirty = true;
@@ -77,24 +72,24 @@ namespace OwlBar
 	{
 		public override void ExposeData()
 		{
-			Scribe_Values.Look<bool>(ref showRoles, "showRoles", true);
-			Scribe_Values.Look<bool>(ref showHunger, "showHunger", true);
-			Scribe_Values.Look<bool>(ref showHungerIfDrafted, "showHungerIfDrafted", true);
-			Scribe_Values.Look<bool>(ref showTired, "showTired", true);
-			Scribe_Values.Look<bool>(ref showTiredIfDrafted, "showTiredIfDrafted", true);
-			Scribe_Values.Look<bool>(ref showWeapons, "showWeapons", true);
-			Scribe_Values.Look<bool>(ref showWeaponsIfDrafted, "showWeaponsIfDrafted", true);
-			Scribe_Values.Look<bool>(ref moodBackgrounds, "moodbackgrounds", true);
-			Scribe_Values.Look<bool>(ref relationshipAltMode, "relationshipAltMode");
-			Scribe_Values.Look<bool>(ref goodMoodAltMode, "goodMoodAltMode");
-			Scribe_Values.Look<int>(ref entriesPerRow, "entriesPerRow", 20);
-			Scribe_Values.Look<int>(ref maxRows, "maxRows", 2);
-			Scribe_Values.Look<float>(ref entryScale, "entryScale", 1f);
+			Scribe_Values.Look(ref showRoles, "showRoles", true);
+			Scribe_Values.Look(ref showHunger, "showHunger", true);
+			Scribe_Values.Look(ref showHungerIfDrafted, "showHungerIfDrafted", true);
+			Scribe_Values.Look(ref showTired, "showTired", true);
+			Scribe_Values.Look(ref showTiredIfDrafted, "showTiredIfDrafted", true);
+			Scribe_Values.Look(ref moodBackgrounds, "moodbackgrounds", true);
+			Scribe_Values.Look(ref relationshipAltMode, "relationshipAltMode");
+			Scribe_Values.Look(ref goodMoodAltMode, "goodMoodAltMode");
+			Scribe_Values.Look(ref compatMode, "compactMode");
+			Scribe_Values.Look(ref drawWeaponsBelow, "drawWeaponsBelow", true);
+			Scribe_Values.Look(ref entriesPerRow, "entriesPerRow", 20);
+			Scribe_Values.Look(ref maxRows, "maxRows", 2);
+			Scribe_Values.Look(ref entryScale, "entryScale", 1f);
 			base.ExposeData();
 		}
 
 		public static bool showRoles = true, showHunger = true, showHungerIfDrafted = true, showTired = true, showTiredIfDrafted = true,
-		showWeapons = true, showWeaponsIfDrafted = true, moodBackgrounds = true, relationshipAltMode, goodMoodAltMode;
+		moodBackgrounds = true, relationshipAltMode, goodMoodAltMode, compatMode, drawWeaponsBelow = true;
 		public static Vector2 scrollPos = Vector2.zero;
 		public static float entryScale = 1f;
 		public static int entriesPerRow = 20, maxRows = 2;

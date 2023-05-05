@@ -3,7 +3,6 @@ using Verse;
 using RimWorld;
 using System.Linq;
 using System.Collections.Generic;
-using static OwlBar.Mod_OwlBar;
 using static RimWorld.ColonistBarColonistDrawer;
 using Settings = OwlBar.ModSettings_OwlBar;
 
@@ -11,21 +10,28 @@ namespace OwlBar
 {
 	public class PawnCache
 	{
-		public PawnCache(Pawn pawn, Vector2 cachedDrawLocs, int worldGroupID, int skipped, int i, float labelMaxWidth)
+		public PawnCache(Pawn pawn, Vector2 cachedDrawLocs, float labelMaxWidth, int worldGroupID, int skipped, int i)
 		{
 			entryIndex = i;
 			ID = pawn.thingIDNumber;
+			var scale = Find.ColonistBar.Scale;
 
 			//Setup BG rect
 			container = new Rect(cachedDrawLocs.x - (72f * skipped * 1f), cachedDrawLocs.y, 48f, 48f);
-			//portraitRect = vanillaColonistBar.drawer.GetPawnTextureRect(container.position);
 			portraitRect = new Rect(container.x + 1f, container.y - 26f, container.m_Width - 2f, container.m_Height + 26f).ContractedBy(2f);
 			portrait = PortraitsCache.Get(pawn, PawnTextureSize, Rot4.South, PawnTextureCameraOffset, 1.28205f, true, true, true, true, null, null, false);
 
 			//Weapon rect
-			weaponRect = container.ContractedBy(5f);
-			weaponRect.y += 5f * 1f;
-			weaponRect.x += 5f * 1f;
+			if (Settings.drawWeaponsBelow)
+			{
+				weaponRect = new Rect(container.x, container.y + container.height * 1.05f, container.width, container.height).ScaledBy(0.75f);
+			}
+			else 
+			{
+				weaponRect = container.ContractedBy(5f);
+				weaponRect.y += 5f;
+				weaponRect.x += 5f;
+			}
 			
 			//Label stuff
 			label = GenMapUI.GetPawnLabel(pawn, labelMaxWidth, Find.ColonistBar.drawer.pawnLabelsCache, 0); 
@@ -96,7 +102,8 @@ namespace OwlBar
 				
 				//Weapon rect
 				Vector2 vector = GUIClip.Unclip(new Vector2(container.m_XMin + container.width / 2f, container.m_YMin + container.height / 2f) * Prefs.UIScale);
-				weaponMatrix = Matrix4x4.TRS(vector, Quaternion.Euler(0f, 0f, weapon.def.equippedAngleOffset +50f), Vector3.one) * Matrix4x4.TRS(-vector, Quaternion.identity, Vector3.one) * GUI.matrix;
+				var iconAngle = Settings.drawWeaponsBelow ? weapon.def.uiIconPath.NullOrEmpty() ? weapon.def.uiIconAngle : 0f : weapon.def.equippedAngleOffset + 50f;
+				weaponMatrix = Matrix4x4.TRS(vector, Quaternion.Euler(0f, 0f, iconAngle), Vector3.one) * Matrix4x4.TRS(-vector, Quaternion.identity, Vector3.one) * GUI.matrix;
 			}
 
 			//Bleeding

@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <LanguageData>
 	<OwlBar.Header.Icons>Icons:</OwlBar.Header.Icons>
-	<OwlBar.Header.Weapons>Weapons:</OwlBar.Header.Weapons>
 	
 	<OwlBar.ShowRoles>Show role icons</OwlBar.ShowRoles>
 	<OwlBar.ShowRoles.Desc>Controls whether or not you want ideology role icons, such as leader or specialist, to show in the pawn portrait. This feature was added because normally icons represent temporarily effects, but the DLC deviates from this by including more permanent ones.</OwlBar.ShowRoles.Desc>
@@ -18,12 +17,6 @@
 	<OwlBar.ShowTiredIfDrafted>...but only show tired icon if drafted</OwlBar.ShowTiredIfDrafted>
 	<OwlBar.ShowTiredIfDrafted.Desc>The tired icon will only be shown if drafted.</OwlBar.ShowTiredIfDrafted.Desc>
 	
-	<OwlBar.ShowWeapons>Show weapons/tools icon</OwlBar.ShowWeapons>
-	<OwlBar.ShowWeapons.Desc>Controls whether or not you want weapons to show on a pawn's portrait.</OwlBar.ShowWeapons.Desc>
-	
-	<OwlBar.ShowWeaponsIfDrafted>...but only show weapons if drafted</OwlBar.ShowWeaponsIfDrafted>
-	<OwlBar.ShowWeaponsIfDrafted.Desc>Weapons will only be shown if drafted.</OwlBar.ShowWeaponsIfDrafted.Desc>
-	
 	<OwlBar.MoodBackgrounds>Show colored mood backgrounds</OwlBar.MoodBackgrounds>
 	<OwlBar.MoodBackgrounds.Desc>Enabling this will make the background color of the pawn portraits represent mood.</OwlBar.MoodBackgrounds.Desc>
 	
@@ -35,6 +28,12 @@
 	
 	<OwlBar.GoodMoodAltMode>Non-break risk mood is green</OwlBar.GoodMoodAltMode>
 	<OwlBar.GoodMoodAltMode.Desc>Normally, if a pawn's mood is fine, there is no mood coloration. Enable this if you'd like good moods to be green instead.</OwlBar.GoodMoodAltMode.Desc>
+	
+	<OwlBar.CompatMode>Compatibility mode</OwlBar.CompatMode>
+	<OwlBar.CompatMode.Desc>Invokes the vanilla colonist bar method to try and allow other mods to do their thing, if possible. Disable to improve performance, or if not needed.</OwlBar.CompatMode.Desc>
+
+	<OwlBar.DrawWeaponsBelow>Draw weapon below</OwlBar.DrawWeaponsBelow>
+	<OwlBar.DrawWeaponsBelow.Desc>Draws the weapon below the portrait, as opposed to drawing it on the portrait itself.</OwlBar.DrawWeaponsBelow.Desc>
 	
 	<OwlBar.Icon.Hungry>Pawn is hungry</OwlBar.Icon.Hungry>
 	<OwlBar.Icon.Tired>Pawn is tired</OwlBar.Icon.Tired>

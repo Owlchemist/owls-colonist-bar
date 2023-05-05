@@ -114,7 +114,7 @@ namespace OwlBar
 					pawnCache = colonistBarCache[i];
 					if (pawnCache == null)
 					{
-						pawnCache = new PawnCache(pawn, cachedDrawLocs, group, skipped, i, labelMaxWidth);
+						pawnCache = new PawnCache(pawn, cachedDrawLocs, labelMaxWidth, group, skipped, i);
 						colonistBarCache[i] = pawnCache;
 					}
 					else if (group != pawnCache.lastWorldGroupID) //This would happen if there has been a change in the grouping, like a pawn switching maps
@@ -146,16 +146,15 @@ namespace OwlBar
 					HandleClicks(pawn, pawnCache, pawnCacheContainer, pawnCache.cacheReorderableGroup, eventCurrent, eventType, out reordering);
 					
 					//Finally draw
-					bool showWeapon = Settings.showWeapons && pawnCache.weapon != null && (!Settings.showWeaponsIfDrafted || pawnCache.drafted);
+					bool showWeapon = Prefs.ShowWeaponsUnderPortraitMode == ShowWeaponsUnderPortraitMode.Always || 
+						(Prefs.ShowWeaponsUnderPortraitMode == ShowWeaponsUnderPortraitMode.WhileDrafted && pawnCache.weapon != null && pawnCache.drafted);
 					if (eventType == EventType.Repaint)
 					{
 						bool highlight = _vanillaInstance.colonistsToHighlight.Contains(pawn);
 						//First invoke the vanilla drawer. Not actually used, just prompting other mod's harmony patches to pre/postfix.
-						_vanillaInstance.drawer.DrawColonist(pawnCacheContainer, pawn, entry.map, highlight, reordering);
+						if (Settings.compatMode) _vanillaInstance.drawer.DrawColonist(pawnCacheContainer, pawn, entry.map, highlight, reordering);
 						//Use our replacement method
-						//Determine transparency
-						if (entry.map != currentMap || reordering) currentTransparency = 0.5f;
-						else currentTransparency = 1f;
+						currentTransparency = entry.map != currentMap || reordering ? 0.5f : 1f;
 						DrawColonistFast(entry, pawnCache, pawnCacheContainer, drawArguments, selectedPawn, guiStyle, _vanillaInstance, highlight, showWeapon, currentTransparency, selectedPawnsLovers, iconDrawQueue);
 					}
 
@@ -210,9 +209,9 @@ namespace OwlBar
 				//Instead of drawing the weapons in the main loop, we batch them all at once, because changing the matrix each loop is quite expensive
 				Matrix4x4 matrix = GUI.matrix;
 				currentTransparency = 1f;
-				foreach (var index in weaponDrawQueue)
+				for (int i = weaponDrawQueue.Count; i-- > 0;)
 				{
-					PawnCache pawnCache2 = colonistBarCache[index];
+					PawnCache pawnCache2 = colonistBarCache[weaponDrawQueue[i]];
 					if (pawnCache2?.weaponIcon == null) continue; //Bad texture?
 					GUIClip.SetMatrix_Injected(ref pawnCache2.weaponMatrix);
 					DrawTextureFast(drawArguments, pawnCache2.weaponRect, pawnCache2.weaponIcon, vector4Zero, pawnCache2.weapon.DrawColor, currentTransparency);
@@ -220,21 +219,17 @@ namespace OwlBar
 				GUI.matrix = matrix;
 
 				//This needs to happen here due to draw layering. The icons need to be ontop of the weapons.
-				length = iconDrawQueue.Count;
-				for (int j = 0; j < length; j++)
+				for (int j = iconDrawQueue.Count; j-- > 0;)
 				{
 					var iconEntry = iconDrawQueue[j];
-					//Transparency
-					if (iconEntry.Item3) currentTransparency = 0.7f;
-					else currentTransparency = 1f;
-					
+					currentTransparency = iconEntry.Item3 ? 0.7f : 1f;
 					var icon = iconEntry.Item2;
 					DrawTextureFast(drawArguments, iconEntry.Item1, icon.texture, vector4Zero, (Color)icon.color, currentTransparency);
 				}
 				
 				//Reset the GUI controller to defaults when done here
 				Text.Font = GameFont.Small;
-				Text.Anchor = TextAnchor.UpperLeft;
+				Text.anchorInt = TextAnchor.UpperLeft;
 			}
 			if (eventType == EventType.Repaint) _vanillaInstance.colonistsToHighlight.Clear();
 		}
@@ -342,9 +337,10 @@ namespace OwlBar
 
 				if (selectedPawnAlt)
 				{
-					foreach (var lover in entry.pawn.GetLoveRelations(false))
+					var list = entry.pawn.GetLoveRelations(false);
+					for (int i = list.Count; i-- > 0;)
 					{
-						selectedPawnsLovers.Add(lover.otherPawn.thingIDNumber);
+						selectedPawnsLovers.Add(list[i].otherPawn.thingIDNumber);
 					}
 				}
 				if (selectedPawnsLovers.Contains(to.thingIDNumber))
@@ -396,10 +392,10 @@ namespace OwlBar
 
 			if (selectedPawnsCount == 1 && selectedPawn.relations != null)
 			{
-				
-				foreach (var lover in selectedPawn.GetLoveRelations(false))
+				var list = selectedPawn.GetLoveRelations(false);
+				for (int i = list.Count; i-- > 0;)
 				{
-					selectedPawnsLovers.Add(lover.otherPawn.thingIDNumber);
+					selectedPawnsLovers.Add(list[i].otherPawn.thingIDNumber);
 				}
 			}
 			else if (Settings.relationshipAltMode) relationshipViewerEnabled = false;
