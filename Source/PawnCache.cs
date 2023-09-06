@@ -101,7 +101,7 @@ namespace OwlBar
 				weaponIcon = (weapon.Graphic.ExtractInnerGraphicFor(weapon).MatSingle.mainTexture as Texture2D) ?? weapon.def.uiIcon;
 				
 				//Weapon rect
-				Vector2 vector = GUIClip.Unclip(new Vector2(container.m_XMin + container.width / 2f, container.m_YMin + container.height / 2f) * Prefs.UIScale);
+				Vector2 vector = GUIClip.Unclip(new Vector2(container.m_XMin + container.width / 2f, container.m_YMin + container.height / 2f));
 				var iconAngle = Settings.drawWeaponsBelow ? weapon.def.uiIconPath.NullOrEmpty() ? weapon.def.uiIconAngle : 0f : weapon.def.equippedAngleOffset + 50f;
 				weaponMatrix = Matrix4x4.TRS(vector, Quaternion.Euler(0f, 0f, iconAngle), Vector3.one) * Matrix4x4.TRS(-vector, Quaternion.identity, Vector3.one) * GUI.matrix;
 			}
